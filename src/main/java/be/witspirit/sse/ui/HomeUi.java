@@ -1,6 +1,6 @@
 package be.witspirit.sse.ui;
 
-import be.witspirit.sse.api.EventApi;
+import be.witspirit.sse.events.EventApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +41,7 @@ public class HomeUi {
 
     @RequestMapping("publishMessage")
     public String publishMessage(@RequestParam("destination") String destination, @RequestParam("message") String message) throws IOException {
-        eventApi.deliver(destination, message);
+        eventApi.publish(destination, message);
         return "redirect:/publish.html";
     }
 }

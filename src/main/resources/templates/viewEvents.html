@@ -8,10 +8,10 @@
 
     <script type="application/javascript">
         let notificationBaseUrl = "http://localhost:8080/events";
-        let source = new EventSource(notificationBaseUrl+"/subscribe/test");
+        let source = new EventSource(notificationBaseUrl+"/test/stream");
 
         source.onopen = e => console.log("Connection Opened");
-        source.onmessage = e => console.log("Message received: "+e.data);
+        source.onmessage = e => console.log("Message received: "+e.id + ":" + e.type+":"+e.data);
     </script>
 </head>
 
