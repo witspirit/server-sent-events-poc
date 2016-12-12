@@ -3,6 +3,7 @@ package be.witspirit.sse.events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -26,7 +27,7 @@ public class EventApi {
         this.dispatcher = dispatcher;
     }
 
-    @RequestMapping(value = "/{topic}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{topic}", method = RequestMethod.POST, consumes = {MediaType.TEXT_PLAIN_VALUE})
     public Event publish(@PathVariable String topic, @RequestBody String message) {
         Event event = eventRepo.storeOn(topic, message);
         dispatcher.dispatch(topic, event);

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Server Side Events PoC</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="application/x-javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+    <script type="application/javascript" th:inline="javascript">
+        $(document).ready(startLogic);
+
+        function startLogic() {
+            let notificationBaseUrl = "http://localhost:8080/events";
+            let topic = /*[[${topic}]]*/ "test";
+            let source = new EventSource(notificationBaseUrl + "/" + topic + "/stream");
+
+            source.onopen = e => console.log("Connection Opened");
+            source.onmessage = e => {
+                let message = e.lastEventId + ":" + e.type + ":" + e.data;
+                console.log("Message received: " + message);
+                $('#messageList').append("<li>" + message + "</li>");
+            }
+
+            $('#messageForm').submit(event => {
+                let messageInput = $('#message');
+                let message = messageInput.val();
+                console.log("Sending message: " + message);
+                messageInput.val(null);
+                $.ajax({
+                    url: "/events/"+topic,
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "text/plain",
+                    data: message,
+                    success: (data, status, xhr) => console.log(status, data),
+                    error: (xhr, status, error) => console.log(status, error)
+                });
+
+                return false;
+            });
+        }
+    </script>
+</head>
+
+<body>
+
+<h1>Topic <span th:text="${topic}">Foo</span></h1>
+
+<h2>Send message</h2>
+
+<form id="messageForm" action="#">
+    <label for="message">Message</label><input id="message" name="message" type="text"/>
+    <input type="submit" name="Send"/>
+</form>
+
+<h2>Observe Messages</h2>
+<ul id="messageList">
+</ul>
+
+
+</body>
+
+</html>
