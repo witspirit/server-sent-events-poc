@@ -54,12 +54,17 @@ public class StreamListener {
             if (status == ListenerStatus.LIVE) {
                 sse.send(SseEmitter.event().id(e.getSequenceNr() + "").name("message").data(e.getMessage()));
             }
-        } catch (IOException ex) {
-            LOG.warn("Failed to dispatch " + e + " to " + this, ex);
-            // Should this change our state ?
-        } catch (IllegalStateException ise) {
-            LOG.warn("Failed to dispatch " + e + " to " + this, ise);
-            this.status = ListenerStatus.COMPLETE; // Most likely reason for ISE
+        } catch (IOException | IllegalStateException ex ) {
+            LOG.info("Failed to dispatch " + e + " to " + this+" : "+ex.getMessage());
+            // IOException: Most likely reason is that the Client Aborted.
+            // Tomcat has a nice exception for this: ClientAbortException, but since it is a Tomcat specific exception,
+            // I'd rather not introduce the dependency.
+
+            // IllegalStateException: Most likely reason is that the Completed state has already been reached
+
+            this.status = ListenerStatus.COMPLETE; // In any case, we have reached a point from which we cannot continue
+
+            LOG.debug("Detailed Exception: ", ex);
         }
     }
 
