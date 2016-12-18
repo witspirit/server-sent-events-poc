@@ -11,33 +11,42 @@
         $(document).ready(startLogic);
 
         function startLogic() {
-            let notificationBaseUrl = "http://localhost:8080/events";
             let topic = /*[[${topic}]]*/ "test";
+            listenOnTopic(topic);
+
+
+            $('#messageForm').submit(event => {
+                let messageInput = $('#message');
+                let message = messageInput.val();
+                messageInput.val(null);
+                sendMessageOnTopic(message, topic);
+
+                return false;
+            });
+        }
+
+        function listenOnTopic(topic) {
+            let notificationBaseUrl = "http://localhost:8080/events";
             let source = new EventSource(notificationBaseUrl + "/" + topic + "/stream");
 
             source.onopen = e => console.log("Connection Opened");
             source.onmessage = e => {
                 let message = e.lastEventId + ":" + e.type + ":" + e.data;
                 console.log("Message received: " + message);
-                $('#messageList').append("<li>" + message + "</li>");
-            }
+                $('#messageList').prepend("<li>" + message + "</li>");
+            };
+        }
 
-            $('#messageForm').submit(event => {
-                let messageInput = $('#message');
-                let message = messageInput.val();
-                console.log("Sending message: " + message);
-                messageInput.val(null);
-                $.ajax({
-                    url: "/events/"+topic,
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "text/plain",
-                    data: message,
-                    success: (data, status, xhr) => console.log(status, data),
-                    error: (xhr, status, error) => console.log(status, error)
-                });
-
-                return false;
+        function sendMessageOnTopic(message, topic) {
+            console.log("Sending message: " + message);
+            $.ajax({
+                url: "/events/"+topic,
+                type: "POST",
+                dataType: "json",
+                contentType: "text/plain",
+                data: message,
+                success: (data, status, xhr) => console.log(status, data),
+                error: (xhr, status, error) => console.log(status, error)
             });
         }
     </script>
